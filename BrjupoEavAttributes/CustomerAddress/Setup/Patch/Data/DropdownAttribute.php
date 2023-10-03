@@ -59,6 +59,12 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
         /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
+        $options = [
+            'depto1 | prov1 | dist1',
+            'depto2 | prov2 | dist2',
+            'depto3 | prov3 | dist3',
+        ];
+
         $customerSetup->addAttribute(AttributeProvider::ENTITY, self::ATTRIBUTE_CODE, [
             'label' => 'Distrito',
             'input' => 'select',
@@ -73,6 +79,9 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
             'position' => self::SORT_ORDER,
             'user_defined' => true,
             'system' => 0,
+            'option' => [
+                'values' => $options
+            ]
         ]);
 
 
@@ -90,18 +99,18 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
 
         $attribute->save();
 
-        $attributeId = $customerSetup->getAttributeId(AttributeProvider::ENTITY, self::ATTRIBUTE_CODE);
+        //$attributeId = $customerSetup->getAttributeId(AttributeProvider::ENTITY, self::ATTRIBUTE_CODE);
 
-        $options = [
-            'depto1 | prov1 | dist1',
-            'depto2 | prov2 | dist2',
-            'depto3 | prov3 | dist3',
-        ];
+        //$options = [
+        //    'depto1 | prov1 | dist1',
+        //    'depto2 | prov2 | dist2',
+        //    'depto3 | prov3 | dist3',
+        //];
 
-        $customerSetup->addAttributeOption([
-            'values' => $options,
-            'attribute_id' => $attributeId
-        ]);
+        //$customerSetup->addAttributeOption([
+        //    'values' => $options,
+        //    'attribute_id' => $attributeId
+        //]);
 
         $this->moduleDataSetup->getConnection()->endSetup();
     }
