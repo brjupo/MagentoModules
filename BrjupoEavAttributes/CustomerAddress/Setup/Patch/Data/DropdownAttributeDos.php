@@ -20,9 +20,9 @@ use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Customer\Model\Indexer\Address\AttributeProvider;
 
 
-class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
+class DropdownAttributeDos implements DataPatchInterface, PatchRevertableInterface
 {
-    const ATTRIBUTE_CODE = 'distrito_envio_rapido';
+    const ATTRIBUTE_CODE = 'd1303';
     const SORT_ORDER = 3000;
     /**
      * @var ModuleDataSetupInterface
@@ -59,11 +59,16 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
         /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
-        $options = [
+        $humanOptions = [
             'depto1 | prov1 | dist1',
             'depto2 | prov2 | dist2',
             'depto3 | prov3 | dist3',
         ];
+        //https://webkul.com/blog/create-drop-down-product-attribute-in-magento-2/
+        $codeOptions = [];
+        foreach ($humanOptions as $key => $value) {
+            $codeOptions['value'][$value][0] = $value;
+        }
 
         $customerSetup->addAttribute(AttributeProvider::ENTITY, self::ATTRIBUTE_CODE, [
             'label' => 'Distrito',
@@ -81,7 +86,7 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
             'user_defined' => true,
             'system' => 0,
             'option' => [
-                'values' => $options
+                $codeOptions
             ]
         ]);
 

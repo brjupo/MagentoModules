@@ -1,31 +1,38 @@
-The README.md file content is generated automatically, see [Magento module README.md](https://github.com/magento/devdocs/wiki/Magento-module-README.md) for more information.
-
 # BrjupoEavAttributes_CustomerAddress module
 
-Create customer address attribute using Data Patch
+This module create a new address attribute this is saved in quote and then in order
 
-## Installation details
+This attribute is NOT saved as an address, this attribute CANNOT be preserved in address forms
 
-For information about a module installation in Magento 2, see [Enable or disable modules](https://devdocs.magento.com/guides/v2.4/install-gde/install/cli/install-cli-subcommands-enable.html).
+The relation between Data Patch, Plugin, db_schema, extension_attributes is:
 
-## Extensibility
+1. Create the customer_address_attribute using **data patch**, with code 'd1713'
+2. Create the **payload-extender-mixin.js** and the **requirejs-config.js**.
+3. In the extender, the value is read using jQuery selector.
+    1. $('[name="custom_attributes[d1713]"]').val();
+4. Also in extender the value is sent using 'direccionestiendas_id'
+    1. payload.addressInformation['extension_attributes']['direccionestiendas_id'] = parseInt(distrito_envio_rapido);
+5. To use this extension_attribute name 'direccionestiendas_id', the attribute MUST be created in
+   **extension_attributes.xml**
+   ```xml
+   <extension_attributes for="Magento\Checkout\Api\Data\ShippingInformationInterface">
+      <attribute code="direccionestiendas_id" type="int"/>
+   </extension_attributes>
+   ```
+6. To save this value in quote, you MUST create a column in quote table using **db_schema.xml**
+    ```xml
+    <table name="quote" resource="checkout" comment="Sales Flat Quote">
+        <column xsi:type="int" name="direccionestiendas_id" unsigned="true" nullable="true"
+                comment="Save direccionestiendas_id in quote"/>
+    </table>
+    ```
 
-Extension developers can interact with the BrjupoEavAttributes_CustomerAddress module. For more information about the Magento extension mechanism, see [Magento plug-ins](https://devdocs.magento.com/guides/v2.4/extension-dev-guide/plugins.html).
-
-[The Magento dependency injection mechanism](https://devdocs.magento.com/guides/v2.4/extension-dev-guide/depend-inj.html) enables you to override the functionality of the BrjupoEavAttributes_CustomerAddress module.
-
-### Layouts
-
-The module introduces layout handles in the `view/adminhtml/layout` directory.
-
-For more information about a layout in Magento 2, see the [Layout documentation](https://devdocs.magento.com/guides/v2.4/frontend-dev-guide/layouts/layout-overview.html).
-
-### UI components
-
-You can extend product and category updates using the UI components located in the `view/adminhtml/ui_component` directory.
-
-For information about a UI component in Magento 2, see [Overview of UI components](https://devdocs.magento.com/guides/v2.4/ui_comp_guide/bk-ui_comps.html).
-
-## Additional information
-
-For information about significant changes in patch releases, see [Release information](https://devdocs.magento.com/guides/v2.4/release-notes/bk-release-notes.html).
+7. With the extension_attribute defined as 'direccionestiendas_id', and the quote table column name as '
+   direccionestiendas_id', now you can use it in the **PHP plugin**, with **camelCase!**
+    ```php
+    $extAttributes = $addressInformation->getExtensionAttributes();
+    $idDireccionestiendas = $extAttributes->getDireccionestiendasId();
+    $quote->setDireccionestiendasId($idDireccionestiendas);
+    ```
+    
+    

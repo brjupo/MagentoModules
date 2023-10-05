@@ -20,9 +20,9 @@ use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Customer\Model\Indexer\Address\AttributeProvider;
 
 
-class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
+class DropdownAttributeTres implements DataPatchInterface, PatchRevertableInterface
 {
-    const ATTRIBUTE_CODE = 'distrito_envio_rapido';
+    const ATTRIBUTE_CODE = 'd1320';
     const SORT_ORDER = 3000;
     /**
      * @var ModuleDataSetupInterface
@@ -59,11 +59,9 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
         /** @var CustomerSetup $customerSetup */
         $customerSetup = $this->customerSetupFactory->create(['setup' => $this->moduleDataSetup]);
 
-        $options = [
-            'depto1 | prov1 | dist1',
-            'depto2 | prov2 | dist2',
-            'depto3 | prov3 | dist3',
-        ];
+        /**
+         * AUN SIN OPCIONES, MARCA EL ERROR
+         */
 
         $customerSetup->addAttribute(AttributeProvider::ENTITY, self::ATTRIBUTE_CODE, [
             'label' => 'Distrito',
@@ -80,9 +78,6 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
             //'position' => self::SORT_ORDER,
             'user_defined' => true,
             'system' => 0,
-            'option' => [
-                'values' => $options
-            ]
         ]);
 
 
@@ -90,7 +85,7 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
 
         $attribute->setData('used_in_forms', [
             //'adminhtml_customer',
-            'adminhtml_checkout',
+            //'adminhtml_checkout',
             'adminhtml_customer_address',
             //'customer_account_create',
             //'customer_account_edit',
@@ -99,19 +94,6 @@ class DropdownAttribute implements DataPatchInterface, PatchRevertableInterface
         ]);
 
         $attribute->save();
-
-        //$attributeId = $customerSetup->getAttributeId(AttributeProvider::ENTITY, self::ATTRIBUTE_CODE);
-
-        //$options = [
-        //    'depto1 | prov1 | dist1',
-        //    'depto2 | prov2 | dist2',
-        //    'depto3 | prov3 | dist3',
-        //];
-
-        //$customerSetup->addAttributeOption([
-        //    'values' => $options,
-        //    'attribute_id' => $attributeId
-        //]);
 
         $this->moduleDataSetup->getConnection()->endSetup();
     }
