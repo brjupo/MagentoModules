@@ -36,6 +36,68 @@ The relation between Data Patch, Plugin, db_schema, extension_attributes is:
     $quote->setDireccionestiendasId($idDireccionestiendas);
     ```
 
+8. Create columns for sales_order and sales_order_grid in db_schema.xml
+    ```xml
+    <table name="sales_order" resource="sales" comment="Sales Flat Order">
+        <column xsi:type="text" name="direcciones_tiendas" nullable="true" comment="Save direccionestiendas as sent to Savar in order"/>
+    </table>
+    <table name="sales_order_grid" resource="sales" comment="Sales Flat Order Grid">
+        <column xsi:type="text" name="direcciones_tiendas" nullable="true" comment="Save direccionestiendas as sent to Savar in order grid"/>
+    </table>
+    ```
+
+9. Create observer to save quote field *direccionestiendas_id* in sales_order
+    ```xml
+    <event name="sales_model_service_quote_submit_before">
+        <observer name="custom_fields_sales_address_save" instance="BrjupoEavAttributes\CustomerAddress\Observer\SaveCustomFieldsInOrder" />
+    </event>
+    ```
+    ```php
+    $order = $observer->getEvent()->getOrder();
+    $quote = $observer->getEvent()->getQuote();
+    
+    $value = "default";
+    if (intval($quote->getDireccionestiendasId()) == 234) {
+        $value = "It's the number 234";
+    }
+    $order->setData('direcciones_tiendas', $value);
+    ```
+
+10. Create a di.xml to save info from sales_order to sales_order_grid
+    ```xml
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="direcciones_tiendas" xsi:type="string">sales_order.direcciones_tiendas</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    ```
+
+
+11. Create sales_order_grid.xml to show the new attribute in Admin > Sales Orders. 
+    1. BrjupoEavAttributes/CustomerAddress/view/adminhtml/ui_component/sales_order_grid.xml
+
+    ```xml
+    <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Ui:etc/ui_configuration.xsd">
+        <columns name="sales_order_columns">
+            <column name="direcciones_tiendas">
+                <argument name="data" xsi:type="array">
+                    <item name="config" xsi:type="array">
+                        <item name="filter" xsi:type="string">textRange</item>
+                        <item name="bodyTmpl" xsi:type="string">ui/grid/cells/html</item>
+                        <item name="label" xsi:type="string" translate="true">Dirección Tienda a Savar</item>
+                    </item>
+                </argument>
+            </column>
+        </columns>
+    </listing>
+    ```
+
+
+
+
 Tested in:
 
 - Magento 2 version 2.4.5-p1
@@ -43,3 +105,4 @@ Tested in:
 Thanks to:
 
 - Jeff Yu http://techjeffyu.com/blog/magento-2-add-a-custom-field-to-checkout-shipping
+- MageAnts https://www.mageants.com/blog/how-to-create-order-attribute-programmatically-in-magento-2.html
