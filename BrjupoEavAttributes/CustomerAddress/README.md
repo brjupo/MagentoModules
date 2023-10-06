@@ -28,11 +28,18 @@ The relation between Data Patch, Plugin, db_schema, extension_attributes is:
     ```
 
 7. With the extension_attribute defined as 'direccionestiendas_id', and the quote table column name as '
-   direccionestiendas_id', now you can use it in the **PHP plugin**, with **camelCase!**
+   direccionestiendas_id', now you can use it in the **PHP plugin**, with **camelCase!**. This plugin intersects data of
+   endpoint /V1/carts/mine/shipping-information OR /V1/guest-carts/:cartId/shipping-information
     ```php
     $extAttributes = $addressInformation->getExtensionAttributes();
     $idDireccionestiendas = $extAttributes->getDireccionestiendasId();
     $quote->setDireccionestiendasId($idDireccionestiendas);
     ```
-    
-    
+
+Tested in:
+
+- Magento 2 version 2.4.5-p1
+
+Thanks to:
+
+- Jeff Yu http://techjeffyu.com/blog/magento-2-add-a-custom-field-to-checkout-shipping

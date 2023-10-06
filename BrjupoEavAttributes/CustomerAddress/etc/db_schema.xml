@@ -5,4 +5,10 @@
         <column xsi:type="int" name="direccionestiendas_id" unsigned="true" nullable="true"
                 comment="Save direccionestiendas_id in quote"/>
     </table>
+    <table name="sales_order" resource="sales" comment="Sales Flat Order">
+        <column xsi:type="text" name="direcciones_tiendas" nullable="true" comment="Save direccionestiendas as sent to Savar in order"/>
+    </table>
+    <table name="sales_order_grid" resource="sales" comment="Sales Flat Order Grid">
+        <column xsi:type="text" name="direcciones_tiendas" nullable="true" comment="Save direccionestiendas as sent to Savar in order grid"/>
+    </table>
 </schema>

@@ -15,7 +15,7 @@ define([
                 originalFunction(payload);
                 //Your logic AFTER original function works
                 // add extended functionality here
-                let distrito_envio_rapido = $('[name="custom_attributes[d1713]"]').val();
+                var distrito_envio_rapido = $('[name="custom_attributes[d1713]"]').val();
                 if (typeof payload.addressInformation['extension_attributes'] != "undefined") {
                     payload.addressInformation['extension_attributes'] = {};
                 }
