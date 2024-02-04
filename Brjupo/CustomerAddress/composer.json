@@ -1,0 +1,17 @@
+{
+  "name": "brjupo/module-customer-address",
+  "version": "1.0.0",
+  "description": "Create Customer Address Custom Attribute programatically, for Magento > 2.4.5",
+  "type": "magento2-module",
+  "require": {
+    "magento/framework": "*"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Brjupo\\CustomerAddress\\": ""
+    }
+  }
+}
