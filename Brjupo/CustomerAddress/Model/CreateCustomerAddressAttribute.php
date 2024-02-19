@@ -19,10 +19,17 @@ use Magento\Store\Model\WebsiteFactory;
 
 use Psr\Log\LoggerInterface;
 
+use Magento\Eav\Model\ResourceModel\Entity\Attribute as EavEntityAttribute;
+
+/** -------------------- TO GET CONSTANTS -------------------- */
+
+use Magento\Customer\Api\AddressMetadataInterface;
+use Magento\Customer\Model\Customer;
+
 /**
- * This class will work as main functionality to create Custom Customer Address Attributes programatically
+ * This class will work as main functionality to create Custom Customer Address Attributes programmatically
  * Taking native class as example, this class is found when we save an attribute manually in Admin
- * This execute method now will return a void or exception INSTEAD of redirect as native class
+ * This "execute" method, now will return a void or exception INSTEAD of redirect as native class
  * Also will receive $data as params INSTEAD of a request->getPostValue()
  *
  * Code copied from
@@ -54,6 +61,8 @@ class CreateCustomerAddressAttribute
 
     protected LoggerInterface $logger;
 
+    protected EavEntityAttribute $eavAttribute;
+
     /**
      * @var FormData|null
      */
@@ -74,23 +83,25 @@ class CreateCustomerAddressAttribute
      * @param HelperAddress $helperAddress
      * @param FilterManager $filterManager
      * @param LoggerInterface $logger
+     * @param EavEntityAttribute $eavAttribute
      * @param FormData|null $formDataSerializer
      * @param array $deniedAttributes
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
-        Registry         $coreRegistry,
-        Config           $eavConfig,
-        AttributeFactory $attrFactory,
-        SetFactory       $attrSetFactory,
-        WebsiteFactory   $websiteFactory,
-        HelperData       $helperData,
-        HelperAddress    $helperAddress,
-        FilterManager    $filterManager,
-        LoggerInterface  $logger,
-        FormData         $formDataSerializer = null,
-        array            $deniedAttributes = []
+        Registry           $coreRegistry,
+        Config             $eavConfig,
+        AttributeFactory   $attrFactory,
+        SetFactory         $attrSetFactory,
+        WebsiteFactory     $websiteFactory,
+        HelperData         $helperData,
+        HelperAddress      $helperAddress,
+        FilterManager      $filterManager,
+        LoggerInterface    $logger,
+        EavEntityAttribute $eavAttribute,
+        FormData           $formDataSerializer = null,
+        array              $deniedAttributes = []
     )
     {
         $this->_coreRegistry = $coreRegistry;
@@ -104,6 +115,7 @@ class CreateCustomerAddressAttribute
         $this->filterManager = $filterManager;
 
         $this->logger = $logger;
+        $this->eavAttribute = $eavAttribute;
 
         $this->formDataSerializer = $formDataSerializer ?: ObjectManager::getInstance()->get(FormData::class);
         $this->deniedAttributes = $deniedAttributes;
@@ -119,19 +131,25 @@ class CreateCustomerAddressAttribute
      */
     public function execute($data)
     {
-        // TODO: Add validation in case the attribute exists!
-        // TODO: Remember you delete, on february 3rd, an IF that considered the case the attribute exists
-        // TODO: Reconsidered it, in case a developer wants to update attribute programatically
+        // TODO: Add Documentation to THIS Module
+        // TODO: For module BrjupoEavAttributes_CustomerAddress CLARIFY that is a strange way to do a workaround in EE
+        // TODO:     AND change the name of module to BrjupoEavAttributes_CustomerAddressEeWorkaround
+        // TODO: Relocate THIS module to BrjupoEavAttributes_CustomerAddressEeWorkaround
         if (!$data) {
             throw new LocalizedException(__('Data is NOT provided'));
             return;
         }
 
+        // In the data patch Brjupo/CustomerAddress/Setup/Patch/Data/AttributeDropdown.php
+        // The serialized_options has been unsearealized for better human reading
+        // If you want to understand the Post data unserialized, check vendor file
+        // module-customer-custom-attributes/Controller/Adminhtml/Customer/Address/Attribute/Save.php
         try {
-            if (!isset($data['serialized_options'])) {
+            if (isset($data['serialized_options'])) {
+                $optionData = $data['serialized_options'];
+            } else {
                 $data['serialized_options'] = '[]';
             }
-            $optionData = $this->formDataSerializer->unserialize($data['serialized_options']);
         } catch (\InvalidArgumentException $e) {
             throw new LocalizedException(__("The attribute couldn't be saved due to an error. Verify your information and try again. "
                 . "If the error persists, please try again later. " . $e->getMessage()));
@@ -154,21 +172,40 @@ class CreateCustomerAddressAttribute
             return;
         }
 
+        //AddressMetadataInterface
+        $attributeId = $this->eavAttribute->getIdByCode(AddressMetadataInterface::ENTITY_TYPE_ADDRESS, $data['attribute_code']);
 
-        $data['backend_model'] = $this->helperData->getAttributeBackendModelByInputType(
-            $data['frontend_input']
-        );
-        $data['source_model'] = $this->helperData->getAttributeSourceModelByInputType($data['frontend_input']);
-        $data['backend_type'] = $this->helperData->getAttributeBackendTypeByInputType($data['frontend_input']);
-        $data['is_user_defined'] = 1;
-        $data['is_system'] = 0;
+        if ($attributeId) {
+            $attributeObject->load($attributeId);
+            if ($attributeObject->getEntityTypeId() != $this->_getEntityType()->getId()
+                || array_key_exists('backend_model', $data)
+            ) {
+                throw new LocalizedException(__('You cannot edit this attribute. You cannot change this entity type. This attribute entity type is different from "customer_address"'));
+                return;
+            }
 
-        // add set and group info
-        $data['attribute_set_id'] = $this->_getEntityType()->getDefaultAttributeSetId();
-        /** @var $attrSet \Magento\Eav\Model\Entity\Attribute\Set */
-        $attrSet = $this->_attrSetFactory->create();
-        $data['attribute_group_id'] = $attrSet->getDefaultGroupId($data['attribute_set_id']);
+            $data['attribute_code'] = $attributeObject->getAttributeCode();
+            $data['is_user_defined'] = $attributeObject->getIsUserDefined();
+            $data['frontend_input'] = $attributeObject->getFrontendInput();
+            $data['is_user_defined'] = $attributeObject->getIsUserDefined();
+            $data['is_system'] = $attributeObject->getIsSystem();
+        } else {
+            /** ------------------------- START - IF ATTRIBUTE DOES NOT EXIST ------------------------- */
+            $data['backend_model'] = $this->helperData->getAttributeBackendModelByInputType(
+                $data['frontend_input']
+            );
+            $data['source_model'] = $this->helperData->getAttributeSourceModelByInputType($data['frontend_input']);
+            $data['backend_type'] = $this->helperData->getAttributeBackendTypeByInputType($data['frontend_input']);
+            $data['is_user_defined'] = 1;
+            $data['is_system'] = 0;
 
+            // add set and group info
+            $data['attribute_set_id'] = $this->_getEntityType()->getDefaultAttributeSetId();
+            /** @var $attrSet \Magento\Eav\Model\Entity\Attribute\Set */
+            $attrSet = $this->_attrSetFactory->create();
+            $data['attribute_group_id'] = $attrSet->getDefaultGroupId($data['attribute_set_id']);
+            /** ------------------------- END - IF ATTRIBUTE DOES NOT EXIST ------------------------- */
+        }
 
         //Always assign the default form
         if (!isset($data['used_in_forms_disabled'])) {
@@ -183,15 +220,14 @@ class CreateCustomerAddressAttribute
         $defaultValueField = $this->helperData->getAttributeDefaultValueByInput($data['frontend_input']);
         if ($defaultValueField) {
             $scopeKeyPrefix = '';
-            if(isset($data['website']) && $data['website']){
+            if (isset($data['website']) && $data['website']) {
                 $scopeKeyPrefix = 'scope_';
             }
-            if(isset($data[$scopeKeyPrefix . $defaultValueField])){
+            if (isset($data[$scopeKeyPrefix . $defaultValueField])) {
                 $defaultValue = $data[$scopeKeyPrefix . $defaultValueField];
                 $data[$scopeKeyPrefix . 'default_value'] = $defaultValue
                     ? $this->filterManager->stripTags($defaultValue) : null;
-            }
-            else {
+            } else {
                 $data[$scopeKeyPrefix . 'default_value'] = null;
             }
         }
@@ -217,7 +253,7 @@ class CreateCustomerAddressAttribute
         /**
          * Check "Use Default Value" checkboxes values
          */
-        if(isset($data['use_default'])){
+        if (isset($data['use_default'])) {
             $useDefaults = $data['use_default'];
             if ($useDefaults) {
                 foreach ($useDefaults as $key) {
