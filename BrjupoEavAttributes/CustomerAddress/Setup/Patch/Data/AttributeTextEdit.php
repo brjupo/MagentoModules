@@ -1,12 +1,15 @@
 <?php
 
-namespace Brjupo\CustomerAddress\Setup\Patch\Data;
+namespace BrjupoEavAttributes\CustomerAddress\Setup\Patch\Data;
 
 /**
  * Adobe Commerce Docs - Default dependencies for Data Patch
  * https://developer.adobe.com/commerce/php/development/components/declarative-schema/patches/
  */
 
+use BrjupoEavAttributes\CustomerAddress\Model\CreateCustomerAddressAttribute;
+use Magento\Customer\Model\Indexer\Address\AttributeProvider;
+use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
@@ -15,11 +18,6 @@ use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 /**
  * Additional dependencies for this Data Patch
  */
-use Magento\Customer\Setup\CustomerSetupFactory;
-use Magento\Customer\Model\Indexer\Address\AttributeProvider;
-
-use Brjupo\CustomerAddress\Model\CreateCustomerAddressAttribute;
-
 class AttributeTextEdit implements DataPatchInterface, PatchRevertableInterface
 {
     const ATTRIBUTE_CODE = 'text_2330';

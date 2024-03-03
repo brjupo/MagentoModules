@@ -1,7 +1,8 @@
 <?php
 
-namespace Brjupo\CustomerAddress\Model;
+namespace BrjupoEavAttributes\CustomerAddress\Model;
 
+use Magento\Customer\Api\AddressMetadataInterface;
 use Magento\Customer\Api\Data\AddressInterface;
 use Magento\Customer\Model\AttributeFactory;
 use Magento\CustomerCustomAttributes\Helper\Address as HelperAddress;
@@ -10,26 +11,17 @@ use Magento\Eav\Api\Data\AttributeInterface;
 use Magento\Eav\Model\Config;
 use Magento\Eav\Model\Entity\Attribute\SetFactory;
 use Magento\Eav\Model\Entity\Type as EavEntityType;
-use Magento\Framework\App\ObjectManager;
+use Magento\Eav\Model\ResourceModel\Entity\Attribute as EavEntityAttribute;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filter\FilterManager;
-use Magento\Framework\Registry;
-use Magento\Framework\Serialize\Serializer\FormData;
 use Magento\Store\Model\WebsiteFactory;
-
 use Psr\Log\LoggerInterface;
 
-use Magento\Eav\Model\ResourceModel\Entity\Attribute as EavEntityAttribute;
-
-/** -------------------- TO GET CONSTANTS -------------------- */
-
-use Magento\Customer\Api\AddressMetadataInterface;
-use Magento\Customer\Model\Customer;
 
 /**
  * This class will work as main functionality to create Custom Customer Address Attributes programmatically
  * Taking native class as example, this class is found when we save an attribute manually in Admin
- * This "execute" method, now will return a void or exception INSTEAD of redirect as native class
+ * This "execute" method, now will return a void or exception INSTEAD of redirect as the native class does
  * Also will receive $data as params INSTEAD of a request->getPostValue()
  *
  * Code copied from
@@ -38,11 +30,34 @@ use Magento\Customer\Model\Customer;
 class CreateCustomerAddressAttribute
 {
     /**
-     * Customer Address Entity Type instance
-     *
-     * @var EavEntityType
+     * @var Config
      */
-    protected $_entityType;
+    protected $_eavConfig;
+
+    /**
+     * @var AttributeFactory
+     */
+    protected $_attrFactory;
+
+    /**
+     * @var SetFactory
+     */
+    protected $_attrSetFactory;
+
+    /**
+     * @var WebsiteFactory
+     */
+    protected $websiteFactory;
+
+    /**
+     * @var LoggerInterface
+     */
+    protected  $logger;
+
+    /**
+     * @var EavEntityAttribute
+     */
+    protected  $eavAttribute;
 
     /**
      * @var HelperData
@@ -59,14 +74,7 @@ class CreateCustomerAddressAttribute
      */
     protected $filterManager;
 
-    protected LoggerInterface $logger;
-
-    protected EavEntityAttribute $eavAttribute;
-
-    /**
-     * @var FormData|null
-     */
-    private $formDataSerializer;
+    /** ------------------ CLASS VARIABLES ------------------ */
 
     /**
      * @var array
@@ -74,50 +82,50 @@ class CreateCustomerAddressAttribute
     private $deniedAttributes = [];
 
     /**
-     * @param Registry $coreRegistry
+     * Customer Address Entity Type instance
+     *
+     * @var EavEntityType
+     */
+    protected $_entityType;
+
+    /**
      * @param Config $eavConfig
      * @param AttributeFactory $attrFactory
      * @param SetFactory $attrSetFactory
      * @param WebsiteFactory $websiteFactory
+     * @param LoggerInterface $logger
+     * @param EavEntityAttribute $eavAttribute
      * @param HelperData $helperData
      * @param HelperAddress $helperAddress
      * @param FilterManager $filterManager
-     * @param LoggerInterface $logger
-     * @param EavEntityAttribute $eavAttribute
-     * @param FormData|null $formDataSerializer
      * @param array $deniedAttributes
      *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
-        Registry           $coreRegistry,
         Config             $eavConfig,
         AttributeFactory   $attrFactory,
         SetFactory         $attrSetFactory,
         WebsiteFactory     $websiteFactory,
+        LoggerInterface    $logger,
+        EavEntityAttribute $eavAttribute,
         HelperData         $helperData,
         HelperAddress      $helperAddress,
         FilterManager      $filterManager,
-        LoggerInterface    $logger,
-        EavEntityAttribute $eavAttribute,
-        FormData           $formDataSerializer = null,
         array              $deniedAttributes = []
     )
     {
-        $this->_coreRegistry = $coreRegistry;
         $this->_eavConfig = $eavConfig;
         $this->_attrFactory = $attrFactory;
         $this->_attrSetFactory = $attrSetFactory;
         $this->websiteFactory = $websiteFactory;
+        $this->logger = $logger;
+        $this->eavAttribute = $eavAttribute;
 
         $this->helperData = $helperData;
         $this->helperAddress = $helperAddress;
         $this->filterManager = $filterManager;
 
-        $this->logger = $logger;
-        $this->eavAttribute = $eavAttribute;
-
-        $this->formDataSerializer = $formDataSerializer ?: ObjectManager::getInstance()->get(FormData::class);
         $this->deniedAttributes = $deniedAttributes;
     }
 
@@ -131,16 +139,12 @@ class CreateCustomerAddressAttribute
      */
     public function execute($data)
     {
-        // TODO: Add Documentation to THIS Module
-        // TODO: For module BrjupoEavAttributes_CustomerAddress CLARIFY that is a strange way to do a workaround in EE
-        // TODO:     AND change the name of module to BrjupoEavAttributes_CustomerAddressEeWorkaround
-        // TODO: Relocate THIS module to BrjupoEavAttributes_CustomerAddressEeWorkaround
         if (!$data) {
             throw new LocalizedException(__('Data is NOT provided'));
             return;
         }
 
-        // In the data patch Brjupo/CustomerAddress/Setup/Patch/Data/AttributeDropdown.php
+        // In the data patch BrjupoEavAttributes/CustomerAddress/Setup/Patch/Data/AttributeDropdown.php
         // The serialized_options has been unsearealized for better human reading
         // If you want to understand the Post data unserialized, check vendor file
         // module-customer-custom-attributes/Controller/Adminhtml/Customer/Address/Attribute/Save.php

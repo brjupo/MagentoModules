@@ -1,12 +1,15 @@
 <?php
 
-namespace Brjupo\CustomerAddress\Setup\Patch\Data;
+namespace BrjupoEavAttributes\CustomerAddress\Setup\Patch\Data;
 
 /**
  * Adobe Commerce Docs - Default dependencies for Data Patch
  * https://developer.adobe.com/commerce/php/development/components/declarative-schema/patches/
  */
 
+use BrjupoEavAttributes\CustomerAddress\Model\CreateCustomerAddressAttribute;
+use Magento\Customer\Model\Indexer\Address\AttributeProvider;
+use Magento\Customer\Setup\CustomerSetupFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
@@ -15,16 +18,10 @@ use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 /**
  * Additional dependencies for this Data Patch
  */
-
-use Magento\Customer\Setup\CustomerSetupFactory;
-use Magento\Customer\Model\Indexer\Address\AttributeProvider;
-
-use Brjupo\CustomerAddress\Model\CreateCustomerAddressAttribute;
-
 class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
 {
-    const ATTRIBUTE_CODE = 'dropdown_18feb_2130';
-    const SORT_ORDER = 20400;
+    const ATTRIBUTE_CODE = 'dropdown_programatically_magento_ee_245';
+    const SORT_ORDER = 30000;
     /**
      * @var ModuleDataSetupInterface
      */
@@ -62,7 +59,7 @@ class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
 
         $dropdownCustomCustomerAddressAttributeData = [];
         $dropdownCustomCustomerAddressAttributeData['serialized_options'] = $this->getSerializedOptions();
-        $dropdownCustomCustomerAddressAttributeData['frontend_label'][0] = 'Feb18_Dropdown_2130';
+        $dropdownCustomCustomerAddressAttributeData['frontend_label'][0] = 'Dropdown programatically Magento EE 245';
         $dropdownCustomCustomerAddressAttributeData['attribute_code'] = self::ATTRIBUTE_CODE;
         $dropdownCustomCustomerAddressAttributeData['frontend_input'] = 'select';
         $dropdownCustomCustomerAddressAttributeData['is_required'] = false;
