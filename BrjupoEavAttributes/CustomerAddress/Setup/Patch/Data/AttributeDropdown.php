@@ -2,25 +2,27 @@
 
 namespace BrjupoEavAttributes\CustomerAddress\Setup\Patch\Data;
 
+use BrjupoEavAttributes\CustomerAddress\Model\CreateCustomerAddressAttribute;
+use Magento\Customer\Model\Indexer\Address\AttributeProvider;
+use Magento\Customer\Setup\CustomerSetupFactory;
+use Magento\Framework\Exception\LocalizedException;
+
 /**
  * Adobe Commerce Docs - Default dependencies for Data Patch
  * https://developer.adobe.com/commerce/php/development/components/declarative-schema/patches/
  */
 
-use BrjupoEavAttributes\CustomerAddress\Model\CreateCustomerAddressAttribute;
-use Magento\Customer\Model\Indexer\Address\AttributeProvider;
-use Magento\Customer\Setup\CustomerSetupFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchRevertableInterface;
 
 /**
- * Additional dependencies for this Data Patch
+ * This Data Patch creates a Customer Custom Address Dropdown attribute
+ * It send data to model to create the attribute
  */
 class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
 {
-    const ATTRIBUTE_CODE = 'dropdown_programatically_magento_ee_245';
+    const ATTRIBUTE_CODE = 'dropdown_programmatically_magento_ee_245';
     const SORT_ORDER = 30000;
     /**
      * @var ModuleDataSetupInterface
@@ -32,11 +34,15 @@ class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
      */
     private $customerSetupFactory;
 
-    private CreateCustomerAddressAttribute $createCustomerAddressAttribute;
+    /**
+     * @var CreateCustomerAddressAttribute
+     */
+    private $createCustomerAddressAttribute;
 
     /**
      * @param ModuleDataSetupInterface $moduleDataSetup
      * @param CustomerSetupFactory $customerSetupFactory
+     * @param CreateCustomerAddressAttribute $createCustomerAddressAttribute
      */
     public function __construct(
         ModuleDataSetupInterface       $moduleDataSetup,
@@ -53,13 +59,13 @@ class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
      * @inheritDoc
      * @throws LocalizedException
      */
-    public function apply()
+    public function apply(): void
     {
         $this->moduleDataSetup->getConnection()->startSetup();
 
         $dropdownCustomCustomerAddressAttributeData = [];
         $dropdownCustomCustomerAddressAttributeData['serialized_options'] = $this->getSerializedOptions();
-        $dropdownCustomCustomerAddressAttributeData['frontend_label'][0] = 'Dropdown programatically Magento EE 245';
+        $dropdownCustomCustomerAddressAttributeData['frontend_label'][0] = 'Dropdown programmatically Magento EE 245';
         $dropdownCustomCustomerAddressAttributeData['attribute_code'] = self::ATTRIBUTE_CODE;
         $dropdownCustomCustomerAddressAttributeData['frontend_input'] = 'select';
         $dropdownCustomCustomerAddressAttributeData['is_required'] = false;
@@ -88,16 +94,20 @@ class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
     /**
      * @return array
      */
-    private function getSerializedOptions()
+    private function getSerializedOptions(): array
     {
         /**
+         * TODO: Read this text!
+         * DONT START TO BE CREATIVE WITH $encodedFields array, ANY BREAK LINE OR SPACES CAN BREAK THE ENCODING!
+         *
          * First line ->  option[order][option_0]=1&
          *  'option_0' is the first option displayed in admin options
          *      starts at zero
          *  '1' represents the ordinal number "first, second, third, fourth, fifth"
          *
          * Second line  ->  default[]=option_0&
-         *  This line indicates the default option, If you want you make option_5 the default option you MUST delete this line here and add it in the option_5 section as "default[]=option_5&"
+         *  This line indicates the default option, If you want you make option_5 the default option
+         *   you MUST delete this line here and add it in the option_5 section as "default[]=option_5&"
          *
          * Third line  ->  option[value][option_0][0]=default_option&
          *  [option_'n'][0] represents the option value
@@ -155,20 +165,22 @@ class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
     /**
      * @inheritDoc
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
 
     /**
-     * Adobe Commerce and Magento Open Source DO NOT ALLOW YOU TO REVERT A PARTICULAR MODULE DATA PATCH. However, you can revert all composer installed or non-composer installed data patches using the module:uninstall command.
+     * Adobe Commerce and Magento Open Source DO NOT ALLOW YOU TO REVERT A PARTICULAR MODULE DATA PATCH.
+     * However, you can revert all composer installed or non-composer installed data patches using
+     *   the module:uninstall command:
      * bin/magento module:uninstall --non-composer Vendor_ModuleName
      * bin/magento module:uninstall Vendor_ModuleName
      * https://developer.adobe.com/commerce/php/development/components/declarative-schema/patches/#reverting-data-patches
      *
      * @return void
      */
-    public function revert()
+    public function revert(): void
     {
         $this->moduleDataSetup->getConnection()->startSetup();
         //Here should go code that will revert all operations from `apply` method
@@ -182,7 +194,7 @@ class AttributeDropdown implements DataPatchInterface, PatchRevertableInterface
     /**
      * @inheritDoc
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }

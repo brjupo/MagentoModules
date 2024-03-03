@@ -152,7 +152,7 @@ class CreateCustomerAddressAttribute
             if (isset($data['serialized_options'])) {
                 $optionData = $data['serialized_options'];
             } else {
-                $data['serialized_options'] = '[]';
+                $optionData = [];
             }
         } catch (\InvalidArgumentException $e) {
             throw new LocalizedException(__("The attribute couldn't be saved due to an error. Verify your information and try again. "
