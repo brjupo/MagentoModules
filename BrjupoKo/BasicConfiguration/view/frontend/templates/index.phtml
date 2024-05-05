@@ -1,0 +1,20 @@
+<?php
+/**
+ * @var $block Magento\Framework\View\Element\Template
+ */
+?>
+
+<h1>Hi from phtml!</h1>
+
+
+<div id="my-html-id" data-bind="scope: 'ko_scope'">
+    <div data-bind="text: message"></div>
+</div>
+
+<script type="text/x-magento-init">
+{
+    "#my-html-id": {
+      "Magento_Ui/js/core/app": <?= $block->getJsLayout() ?>
+    }
+}
+</script>

@@ -1,0 +1,17 @@
+{
+  "name": "brjupo-ko/module-basic-config-using-alias",
+  "version": "1.0.0",
+  "description": "Creation of a basic KnockoutJS template using an alias in requirejs-config-js",
+  "type": "magento2-module",
+  "require": {
+    "magento/framework": "*"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "BrjupoKo\\BasicConfigUsingAlias\\": ""
+    }
+  }
+}
