@@ -1,0 +1,17 @@
+{
+  "name": "brjupo-ko/module-basic-use-of-variables",
+  "version": "1.0.0",
+  "description": "Creation of a basic KnockoutJS template using basic variables between JS and HTML template",
+  "type": "magento2-module",
+  "require": {
+    "magento/framework": "*"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "BrjupoKo\\BasicConfigUsingAlias\\": ""
+    }
+  }
+}

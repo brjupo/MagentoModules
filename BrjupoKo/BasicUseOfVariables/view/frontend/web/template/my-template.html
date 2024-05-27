@@ -1,0 +1,144 @@
+<!-- KnockOut JS Official Documentation -->
+<!-- https://knockoutjs.com/documentation/introduction.html -->
+
+<!-- KnockOut JS Bindings -->
+<!-- https://knockoutjs.com/documentation/text-binding.html -->
+
+<!-- Magento2 - Custom Knockout.js bindings -->
+<!-- https://developer.adobe.com/commerce/frontend-core/ui-components/concepts/knockout-bindings/ -->
+
+<h2>Controlling text and appearance</h2>
+
+<h3>Visible and hidden Binding</h3>
+<div data-bind="visible: myVisibleHiddenVariable">
+    You will see this message only when "myVisibleHiddenVariable" holds a true value.
+</div>
+
+<h3>Text Binding</h3>
+<div data-bind="text: myTextVariable"></div>
+
+<h3>HTML Binding</h3>
+<div data-bind="html: myHtmlVariable"></div>
+
+<h3>Class Binding</h3>
+<div data-bind="class: myClassVariable">This div has the class provided from the binding myClassVariable</div>
+
+<h3>Css Binding [For class]</h3>
+<div data-bind="css: { myClass: myCssVariable }">This div has the CSS class if the provided binding myCssVariable is
+    TRUE
+</div>
+
+<h3>Style Binding</h3>
+<div data-bind="style: { backgroundColor: myStyleVariable }">This div has the style provided from the binding
+    myClassVariable. Remember to change to camelCase, for example to use background-color use backgroundColor
+</div>
+
+<h3>Attribute Binding</h3>
+<a data-bind="attr: { href: url, title: details }">
+    This div has the attributes provided from the binding 'url' and 'details' variables
+</a>
+<div style="height: 50px"></div>
+
+<h2>Control flow</h2>
+
+<h3> Foreach binding </h3>
+<div style="height: 20px"></div>
+
+<div>Option 1</div>
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>First name</th>
+        <th>Last name</th>
+    </tr>
+    </thead>
+    <tbody data-bind="foreach: people">
+    <tr>
+        <td data-bind="text: $index() + 1"></td>
+        <td data-bind="text: firstName"></td>
+        <td data-bind="text: lastName"></td>
+    </tr>
+    </tbody>
+</table>
+<div style="height: 20px"></div>
+
+<div>Option 2</div>
+<table>
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>First name</th>
+        <th>Last name</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- ko foreach: people -->
+    <tr>
+        <td data-bind="text: $index() + 1"></td>
+        <td data-bind="text: firstName"></td>
+        <td data-bind="text: lastName"></td>
+    </tr>
+    <!-- /ko -->
+    </tbody>
+</table>
+<div style="height: 50px"></div>
+
+<h3> If binding </h3>
+
+<div>qty value: <span data-bind="text: qty"></span></div>
+<div data-bind="if: qty > 10">This message is shown if 'qty' is greater than 10</div>
+<!-- ko if: qty > 10 -->
+<div>This message is shown if 'qty' is greater than 10</div>
+<!-- /ko -->
+<div style="height: 20px"></div>
+
+<div>radius value: <span data-bind="text: radius"></span></div>
+<div data-bind="ifnot: radius > 10">This message is shown if 'radius' is NOT greater than 10</div>
+<!-- ko ifnot: radius > 10 -->
+<div>This message is shown if 'radius' is NOT greater than 10</div>
+<!-- /ko -->
+
+<h2>Working with form fields</h2>
+
+<h3>The click binding</h3>
+<div>
+    You've clicked <span data-bind="text: numberOfClicks"></span> times
+    <button data-bind="click: incrementClickCounter">Click me</button>
+</div>
+<div style="height: 20px"></div>
+
+
+<h3>The "textInput" binding</h3>
+<div>Data provided by the user: <input data-bind="textInput: userData" /></div>
+<div>Current observable value: <span data-bind="text: userData"></span></div>
+
+
+<div style="height: 50px"></div>
+<div>Check more information about Bindings at:</div>
+<div>KnockOut JS Official Documentation</div>
+<a href="https://knockoutjs.com/documentation/introduction.html">https://knockoutjs.com/documentation/introduction.html</a>
+<div style="height: 50px"></div>
+
+<h2>Debugging</h2>
+<p>You can debug using this commands in Browser Console</p>
+
+<strong>require('uiRegistry').get(function(component){console.log(component.name);})</strong>
+<p>This command will list ALL available KO JS components in the current page.</p>
+<p>For example, in this list you will find <strong>component_scope</strong> which is the name of this component</p>
+<div style="height: 20px"></div>
+
+<strong>require('ko').contextFor($0)</strong>
+<p>If you DOESN'T know the name of the Component in the window, you can click right click -> Inspect, then type this command in console and the information about the clicked element will be displayed</p>
+<div style="height: 20px"></div>
+
+<strong>require('uiRegistry').get('component_scope')</strong>
+<p>This command will show you all the information about 'component_scope' Component</p>
+<div style="height: 20px"></div>
+
+<strong>require('uiRegistry').get('component_scope').numberOfClicks()</strong>
+<p>This command will show you the value of the observable "numberOfClicks"</p>
+
+
+<div style="height: 100px"></div>
+<div data-bind="text: message"></div>

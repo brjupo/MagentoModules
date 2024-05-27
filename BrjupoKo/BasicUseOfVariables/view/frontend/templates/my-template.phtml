@@ -1,0 +1,20 @@
+<div id="custom-component-container" data-bind="scope: 'component_scope'">
+    <!-- ko template: getTemplate() --><!-- /ko -->
+</div>
+<script type="text/x-magento-init">
+    {
+        "#custom-component-container": {
+            "Magento_Ui/js/core/app": {
+                "components": {
+                    "component_scope": {
+                        "component": "my_js_custom_component_buov",
+                        "config": {
+                            "template":
+                            "BrjupoKo_BasicUseOfVariables/my-template"
+                        }
+                    }
+                }
+            }
+        }
+    }
+</script>
