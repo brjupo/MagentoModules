@@ -1,0 +1,22 @@
+<?php
+// Variables que pasaremos a JavaScript
+$variables = [
+    'message' => __('Hello from PHP!'),
+    'timestamp' => time()
+];
+?>
+
+<div>
+    <h1><?= __('Variables from PHP to JavaScript') ?></h1>
+    <p><?= __('Check the browser console for the output.') ?></p>
+</div>
+
+<script type="text/x-magento-init">
+    {
+        "*": {
+            "Brjupo_VarsFromPhtmlToJS/js/index": {
+                "foo": 300
+            }
+        }
+    }
+</script>

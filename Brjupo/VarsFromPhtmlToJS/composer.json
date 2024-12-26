@@ -1,0 +1,17 @@
+{
+  "name": "brjupo/module-vars-from-phtml-to-j-s",
+  "version": "1.0.0",
+  "description": "Use variables from PHTML in a JS file",
+  "type": "magento2-module",
+  "require": {
+    "magento/framework": "*"
+  },
+  "autoload": {
+    "files": [
+      "registration.php"
+    ],
+    "psr-4": {
+      "Brjupo\\VarsFromPhtmlToJS\\": ""
+    }
+  }
+}
